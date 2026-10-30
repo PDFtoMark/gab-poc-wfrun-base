@@ -1,0 +1,26 @@
+name: Listener Deploy
+on:
+  workflow_run:
+    workflows: ["Release Workflow"]
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  check:
+    if: |
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'development')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          echo "TRIGGERED-DEPLOY-LISTENER"
+          echo "upstream_event=${{ github.event.workflow_run.event }}"
+          echo "head_branch=${{ github.event.workflow_run.head_branch }}"
+          echo "head_repo=${{ github.event.workflow_run.head_repository.full_name }}"
+          echo "base_repo=${{ github.repository }}"
+          echo "conclusion=${{ github.event.workflow_run.conclusion }}"
+          echo "secret_len=${#DEPLOY_HOST}"
